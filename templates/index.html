@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-do List</title>
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+    <div class="box" id="heading">
+        <h1 style = "color: #ffffff">{{ today }}</h1>
+    </div>
+
+    <div class="box">
+
+        {% if leng == 0: %}
+            <p style="text-align: center;">No Task Added Yet</p>
+
+        {% else: %}
+            {% for item in list_items  %}
+                <form action="/delete-item" method="POST">
+                    <div class="item" >
+                        <input type="checkbox"  name="checkbox" value="{{item['id']}}" onchange="this.form.submit()">
+                        <p class="task_name"> {{ item.content }} </p>
+                        <p class="duedate {{ 'overdue' if item.overdue==True else 'notdue' }}">
+                            {{ item.due_date['day']}} / {{item.due_date['month']}} / {{item.due_date['year']}}
+                            <br>
+                            Status: {{ 'Overdue' if item.overdue==True else 'Due' }}
+                        </p>
+                    </div>
+                    <hr>
+                </form>
+            {% endfor %}
+        {% endif %}
+
+
+
+        <form class="item " action="/" method="POST">
+            <input type="text" name="newItem" autocomplete="off" placeholder="Add a New Task Here" required>
+            <input type="date" name="duedate" required>
+            <button type="submit" name="submit">+</button>
+        </form>
+    </div>
+
+
+</body>
+</html>
