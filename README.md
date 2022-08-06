@@ -9,6 +9,7 @@ A simple todo list built using Flask
 
 <hr>
 
+<h1> Program Flowchart </h1>
 <div>
   <img src="./Flask Todo List Flowchart.png" alt="Program Flowchart">
 </div>
