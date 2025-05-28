@@ -5,6 +5,9 @@ app = Flask(__name__)
 
 
 items = []
+editing_id = None  # Tracks which task is currently being edited
+
+
 week_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
           'September', 'October', 'November', 'December']
@@ -55,7 +58,8 @@ def home():
                         item['overdue'] = False
 
         return redirect(url_for('home'))
-    return render_template('index.html', list_items=items, today=curr_day, leng=len(items))
+    return render_template('index.html', list_items=items, today=curr_day, leng=len(items), editing_id=editing_id)
+
 
 
 @app.route('/delete-item', methods=['POST'])
@@ -68,6 +72,27 @@ def delete_item():
                 del items[items.index(item)]
                 break
         return redirect('/')
+    
+@app.route('/set-edit/<int:item_id>')
+def set_edit(item_id):
+    global editing_id
+    editing_id = item_id
+    return redirect('/')
+
+@app.route('/edit-item', methods=['POST'])
+def edit_item():
+    global editing_id
+    form = request.form
+    edit_id = int(form['edit_id'])
+    new_content = form['new_content']
+
+    for item in items:
+        if item['id'] == edit_id:
+            item['content'] = new_content
+            break
+
+    editing_id = None  # Clear edit state after saving
+    return redirect('/')
 
 
 if __name__ == '__main__':

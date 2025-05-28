@@ -9,40 +9,56 @@
 </head>
 <body>
     <div class="box" id="heading">
-        <h1 style = "color: #ffffff">{{ today }}</h1>
+        <h1 style="color: #ffffff">{{ today }}</h1>
     </div>
 
     <div class="box">
 
         {% if leng == 0: %}
             <p style="text-align: center;">No Task Added Yet</p>
-
         {% else: %}
-            {% for item in list_items  %}
-                <form action="/delete-item" method="POST">
-                    <div class="item" >
-                        <input type="checkbox"  name="checkbox" value="{{item['id']}}" onchange="this.form.submit()">
-                        <p class="task_name"> {{ item.content }} </p>
-                        <p class="duedate {{ 'overdue' if item.overdue==True else 'notdue' }}">
-                            {{ item.due_date['day']}} / {{item.due_date['month']}} / {{item.due_date['year']}}
-                            <br>
-                            Status: {{ 'Overdue' if item.overdue==True else 'Due' }}
-                        </p>
-                    </div>
-                    <hr>
-                </form>
-            {% endfor %}
+            {% for item in list_items %}
+    <div class="item">
+    <input type="checkbox" name="task_check" value="{{ item.id }}">
+
+    {% if item.id == editing_id %}
+        <!-- EDIT MODE -->
+        <form action="/edit-item" method="POST" style="display: flex; align-items: center; width: 100%;">
+            <input type="hidden" name="edit_id" value="{{ item.id }}">
+            <input type="text" name="new_content" value="{{ item.content }}" required style="width: 70%; font-size: 1rem;">
+            <button type="submit" class="edit-button">Save</button>
+        </form>
+    {% else %}
+        <!-- NORMAL VIEW -->
+        <p class="task_name">{{ item.content }}</p>
+        <form action="/set-edit/{{ item.id }}" method="GET" style="display: inline;">
+            <button type="submit" class="edit-button">Edit</button>
+        </form>
+    {% endif %}
+
+    <!-- Due Date -->
+    <p class="duedate {{ 'overdue' if item.overdue else 'notdue' }}">
+        {{ item.due_date['day'] }} / {{ item.due_date['month'] }} / {{ item.due_date['year'] }}<br>
+        Status: {{ 'Overdue' if item.overdue else 'Due' }}
+    </p>
+
+    <!-- Delete -->
+    <form action="/delete-item" method="POST" style="display:inline;">
+        <input type="hidden" name="checkbox" value="{{ item.id }}">
+        <button type="submit" class="delete-button">Delete</button>
+    </form>
+</div>
+<hr>
+
+        {% endfor %}
+
         {% endif %}
 
-
-
-        <form class="item " action="/" method="POST">
+        <form class="item" action="/" method="POST">
             <input type="text" name="newItem" autocomplete="off" placeholder="Add a New Task Here" required>
             <input type="date" name="duedate" required>
             <button type="submit" name="submit">+</button>
         </form>
     </div>
-
-
 </body>
 </html>
