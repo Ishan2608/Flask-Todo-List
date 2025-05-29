@@ -1,65 +1,59 @@
 from flask import Flask, render_template, redirect, url_for, request
-from datetime import datetime
+from datetime import datetime, date
 
 app = Flask(__name__)
 
-
-items = []
-editing_id = None  # Tracks which task is currently being edited
-
+items = []         
+history = []       
+editing_id = None   
+next_id = 1         
 
 week_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
           'September', 'October', 'November', 'December']
 
-year = int(datetime.now().year)
-month = int(datetime.now().month)
-day = int(datetime.now().day)
-weekday = datetime.now().weekday()
+now = datetime.now()
+year, month, day = now.year, now.month, now.day
+weekday = now.weekday()
 week_day = week_days[weekday]
-month_name = months[month-1]
+month_name = months[month - 1]
 curr_day = f'{day} {month_name} {year}, {week_day}'
 
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    global year, month, day
+    global next_id
     if request.method == 'POST':
         form_data = request.form
         new_item_content = form_data['newItem']
         new_item_duedate = form_data['duedate']
+        new_item_category = form_data['category']
 
-        date_is = new_item_duedate.split("-")
-        due_year = int(date_is[0])
-        due_month = int(date_is[1])
-        due_day = int(date_is[2])
+        due_year, due_month, due_day = map(int, new_item_duedate.split("-"))
 
-        print(date_is)
-        new_item_id = len(items) + 1
         new_item = {
-            'id': int(new_item_id),
+            'id': next_id,
             'content': new_item_content,
+            'category': new_item_category,
             'due_date': {
                 'year': due_year,
                 'month': due_month,
                 'day': due_day
             }
         }
-
+        next_id += 1
         items.append(new_item)
-
+        
         for item in items:
-            date = item['due_date']
-            if date['year'] == year:
-                if date['month'] == month:
-                    if date['day'] < day:
-                        item['overdue'] = True
-                    else:
-                        item['overdue'] = False
+            due = item['due_date']
+            due_date_obj = date(due['year'], due['month'], due['day'])
+            item['overdue'] = due_date_obj < date.today()
+
+        items.sort(key=lambda item: date(item['due_date']['year'], item['due_date']['month'], item['due_date']['day']))
 
         return redirect(url_for('home'))
-    return render_template('index.html', list_items=items, today=curr_day, leng=len(items), editing_id=editing_id)
 
+    return render_template('index.html', list_items=items, today=curr_day, leng=len(items), editing_id=editing_id, history=history)
 
 
 @app.route('/delete-item', methods=['POST'])
@@ -69,15 +63,39 @@ def delete_item():
         id = int(form['checkbox'])
         for item in items:
             if item['id'] == id:
-                del items[items.index(item)]
+                history.append({
+                    **item,
+                    'status': 'Deleted',
+                    'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                })
+                items.remove(item)
                 break
         return redirect('/')
-    
+
+
+@app.route('/complete-item', methods=['POST'])
+def complete_item():
+    if request.method == 'POST':
+        form = request.form
+        id = int(form['complete_id'])
+        for item in items:
+            if item['id'] == id:
+                history.append({
+                    **item,
+                    'status': 'Completed',
+                    'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                })
+                items.remove(item)
+                break
+        return redirect('/')
+
+
 @app.route('/set-edit/<int:item_id>')
 def set_edit(item_id):
     global editing_id
     editing_id = item_id
     return redirect('/')
+
 
 @app.route('/edit-item', methods=['POST'])
 def edit_item():
@@ -91,7 +109,7 @@ def edit_item():
             item['content'] = new_content
             break
 
-    editing_id = None  # Clear edit state after saving
+    editing_id = None
     return redirect('/')
 
 

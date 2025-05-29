@@ -7,6 +7,7 @@
     <title>To-do List</title>
     <link rel="stylesheet" href="../static/style.css">
 </head>
+
 <body>
     <div class="box" id="heading">
         <h1 style="color: #ffffff">{{ today }}</h1>
@@ -19,36 +20,37 @@
         {% else: %}
             {% for item in list_items %}
     <div class="item">
-    <input type="checkbox" name="task_check" value="{{ item.id }}">
+
+    <form action="/complete-item" method="POST" style="display: inline;">
+        <input type="hidden" name="complete_id" value="{{ item.id }}">
+        <input type="checkbox" onchange="this.form.submit()">
+    </form>
 
     {% if item.id == editing_id %}
-        <!-- EDIT MODE -->
-        <form action="/edit-item" method="POST" style="display: flex; align-items: center; width: 100%;">
-            <input type="hidden" name="edit_id" value="{{ item.id }}">
-            <input type="text" name="new_content" value="{{ item.content }}" required style="width: 70%; font-size: 1rem;">
-            <button type="submit" class="edit-button">Save</button>
-        </form>
+    <form action="/edit-item" method="POST" style="display: flex; align-items: center; width: 100%;">
+        <input type="hidden" name="edit_id" value="{{ item.id }}">
+        <input type="text" name="new_content" value="{{ item.content }}" required style="width: 70%; font-size: 1rem;">
+        <button type="submit" class="edit-button">Save</button>
+    </form>
+
     {% else %}
-        <!-- NORMAL VIEW -->
-        <p class="task_name">{{ item.content }}</p>
+        <p class="task_name">{{ item.content }} <span style="font-size: 0.8rem; color: gray;">({{ item.category }})</span></p>
         <form action="/set-edit/{{ item.id }}" method="GET" style="display: inline;">
             <button type="submit" class="edit-button">Edit</button>
         </form>
     {% endif %}
 
-    <!-- Due Date -->
     <p class="duedate {{ 'overdue' if item.overdue else 'notdue' }}">
         {{ item.due_date['day'] }} / {{ item.due_date['month'] }} / {{ item.due_date['year'] }}<br>
         Status: {{ 'Overdue' if item.overdue else 'Due' }}
     </p>
 
-    <!-- Delete -->
     <form action="/delete-item" method="POST" style="display:inline;">
         <input type="hidden" name="checkbox" value="{{ item.id }}">
         <button type="submit" class="delete-button">Delete</button>
     </form>
-</div>
-<hr>
+    </div>
+    <hr>
 
         {% endfor %}
 
@@ -56,9 +58,36 @@
 
         <form class="item" action="/" method="POST">
             <input type="text" name="newItem" autocomplete="off" placeholder="Add a New Task Here" required>
+            <select name="category" required style="height: 50px; font-size: 1rem; margin: 5px;">
+                <option value="" disabled selected>Category</option>
+                <option value="Work">Work</option>
+                <option value="House">House</option>
+                <option value="Shopping">Shopping</option>
+                <option value="School">School</option>
+                <option value="Other">Other</option>
+            </select>
             <input type="date" name="duedate" required>
             <button type="submit" name="submit">+</button>
         </form>
     </div>
+
+    <div class="box">
+        <h2 style="text-align: center;">Task History</h2>
+        {% if history|length == 0 %}
+            <p style="text-align: center;">No task history yet.</p>
+        {% else %}
+            {% for item in history %}
+                <div class="item history-item">
+                    <p class="history-font"><strong>{{ item.content }}</strong> ({{ item.category }}) - {{ item.status }} on {{ item.timestamp }}</p>
+                    <p class="duedate">
+                        Due: {{ item.due_date['day'] }}/{{ item.due_date['month'] }}/{{ item.due_date['year'] }}
+                    </p>
+                </div>
+                <hr>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+
 </body>
 </html>
