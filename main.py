@@ -3,10 +3,10 @@ from datetime import datetime, date
 
 app = Flask(__name__)
 
-items = []         
-history = []       
-editing_id = None   
-next_id = 1         
+items = []
+history = []
+editing_id = None
+next_id = 1
 
 week_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
@@ -25,11 +25,18 @@ def home():
     global next_id
     if request.method == 'POST':
         form_data = request.form
-        new_item_content = form_data['newItem']
-        new_item_duedate = form_data['duedate']
-        new_item_category = form_data['category']
+        new_item_content = form_data.get('newItem', '').strip()
+        new_item_duedate = form_data.get('duedate', '')
+        new_item_category = form_data.get('category', '')
 
-        due_year, due_month, due_day = map(int, new_item_duedate.split("-"))
+        # Skip if content is empty
+        if not new_item_content:
+            return redirect(url_for('home'))
+
+        try:
+            due_year, due_month, due_day = map(int, new_item_duedate.split("-"))
+        except (ValueError, AttributeError):
+            return redirect(url_for('home'))
 
         new_item = {
             'id': next_id,
@@ -43,12 +50,14 @@ def home():
         }
         next_id += 1
         items.append(new_item)
-        
+
+        # Flag overdue
         for item in items:
             due = item['due_date']
             due_date_obj = date(due['year'], due['month'], due['day'])
             item['overdue'] = due_date_obj < date.today()
 
+        # Sort by due date
         items.sort(key=lambda item: date(item['due_date']['year'], item['due_date']['month'], item['due_date']['day']))
 
         return redirect(url_for('home'))
@@ -60,49 +69,58 @@ def home():
 def delete_item():
     if request.method == 'POST':
         form = request.form
-        id = int(form['checkbox'])
-        for item in items:
-            if item['id'] == id:
-                history.append({
-                    **item,
-                    'status': 'Deleted',
-                    'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                })
-                items.remove(item)
-                break
-        return redirect('/')
+        try:
+            id = int(form['checkbox'])
+        except (KeyError, ValueError):
+            return redirect(url_for('home'))
+
+        target = next((item for item in items if item['id'] == id), None)
+        if target:
+            history.append({
+                **target,
+                'status': 'Deleted',
+                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            })
+            items.remove(target)
+        return redirect(url_for('home'))
 
 
 @app.route('/complete-item', methods=['POST'])
 def complete_item():
     if request.method == 'POST':
         form = request.form
-        id = int(form['complete_id'])
-        for item in items:
-            if item['id'] == id:
-                history.append({
-                    **item,
-                    'status': 'Completed',
-                    'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                })
-                items.remove(item)
-                break
-        return redirect('/')
+        try:
+            id = int(form['complete_id'])
+        except (KeyError, ValueError):
+            return redirect(url_for('home'))
+
+        target = next((item for item in items if item['id'] == id), None)
+        if target:
+            history.append({
+                **target,
+                'status': 'Completed',
+                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            })
+            items.remove(target)
+        return redirect(url_for('home'))
 
 
 @app.route('/set-edit/<int:item_id>')
 def set_edit(item_id):
     global editing_id
     editing_id = item_id
-    return redirect('/')
+    return redirect(url_for('home'))
 
 
 @app.route('/edit-item', methods=['POST'])
 def edit_item():
     global editing_id
     form = request.form
-    edit_id = int(form['edit_id'])
-    new_content = form['new_content']
+    try:
+        edit_id = int(form['edit_id'])
+        new_content = form['new_content'].strip()
+    except (KeyError, ValueError):
+        return redirect(url_for('home'))
 
     for item in items:
         if item['id'] == edit_id:
@@ -110,7 +128,7 @@ def edit_item():
             break
 
     editing_id = None
-    return redirect('/')
+    return redirect(url_for('home'))
 
 
 if __name__ == '__main__':
