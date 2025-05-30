@@ -1,7 +1,7 @@
-import test_app
+import testing
 from main import app, items, history
 
-@test_app.fixture
+@testing.fixture
 def client():
     with app.test_client() as client:
         yield client
