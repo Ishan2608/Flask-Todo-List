@@ -122,6 +122,5 @@ def edit_item():
     editing_id = None
     return redirect(url_for('home'))
 
-# pragma: no cover
 if __name__ == '__main__': 
-    app.run(debug=True)
+    app.run(debug=True) # pragma: no cover
