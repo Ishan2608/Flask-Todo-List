@@ -104,7 +104,6 @@ def set_edit(item_id):
     editing_id = item_id
     return redirect(url_for('home'))
 
-
 @app.route('/edit-item', methods=['POST'])
 def edit_item():
     global editing_id
@@ -124,4 +123,4 @@ def edit_item():
     return redirect(url_for('home'))
 
 if __name__ == '__main__': # pragma: no cover
-    app.run(debug=True)# pragma: no cover
+    app.run(debug=True)
