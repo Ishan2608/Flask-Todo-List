@@ -138,10 +138,6 @@ def test_history_view(client):
     assert b'History' in response.data
     assert b'Completed' in response.data
 
-# =========================
-# ✅ Additional coverage tests
-# =========================
-
 def test_delete_invalid_id(client):
     response = client.post('/delete-item', data={}, follow_redirects=True)
     assert response.status_code == 200

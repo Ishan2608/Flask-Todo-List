@@ -19,7 +19,6 @@ week_day = week_days[weekday]
 month_name = months[month - 1]
 curr_day = f'{day} {month_name} {year}, {week_day}'
 
-
 @app.route('/', methods=['GET', 'POST'])
 def home():
     global next_id
@@ -29,7 +28,6 @@ def home():
         new_item_duedate = form_data.get('duedate', '')
         new_item_category = form_data.get('category', '')
 
-        # Skip if content is empty
         if not new_item_content:
             return redirect(url_for('home'))
 
@@ -51,19 +49,16 @@ def home():
         next_id += 1
         items.append(new_item)
 
-        # Flag overdue
         for item in items:
             due = item['due_date']
             due_date_obj = date(due['year'], due['month'], due['day'])
             item['overdue'] = due_date_obj < date.today()
 
-        # Sort by due date
         items.sort(key=lambda item: date(item['due_date']['year'], item['due_date']['month'], item['due_date']['day']))
 
         return redirect(url_for('home'))
 
     return render_template('index.html', list_items=items, today=curr_day, leng=len(items), editing_id=editing_id, history=history)
-
 
 @app.route('/delete-item', methods=['POST'])
 def delete_item():
@@ -84,7 +79,6 @@ def delete_item():
             items.remove(target)
         return redirect(url_for('home'))
 
-
 @app.route('/complete-item', methods=['POST'])
 def complete_item():
     if request.method == 'POST':
@@ -103,7 +97,6 @@ def complete_item():
             })
             items.remove(target)
         return redirect(url_for('home'))
-
 
 @app.route('/set-edit/<int:item_id>')
 def set_edit(item_id):
@@ -129,7 +122,6 @@ def edit_item():
 
     editing_id = None
     return redirect(url_for('home'))
-
 
 if __name__ == '__main__':
     app.run(debug=True)# pragma: no cover
