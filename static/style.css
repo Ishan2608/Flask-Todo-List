@@ -142,4 +142,80 @@
     box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.301);
   }
   
-  
+  .delete-button {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 10px;
+  }
+
+  .delete-button:hover {
+    background-color: #c0392b;
+  }
+
+  .edit-button {
+    background-color: #f39c12;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 10px;
+    margin-left: 5px;
+  }
+
+  .edit-button:hover {
+    background-color: #d68910;
+  }
+
+  input[name="new_content"] {
+    padding: 5px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+select[name="category"] {
+  margin: 5px;
+  height: 50px;
+  font-size: 15px;
+  font-weight: 200;
+  border: none;
+  border-bottom: 4px solid #494848;
+  background: transparent;
+  color: #353434;
+  width: 20%;
+  text-align: center;
+  appearance: none;
+  padding: 0 10px;
+}
+
+select[name="category"]:hover,
+select[name="category"]:focus {
+  outline: none;
+  border: 2px solid #494848;
+  border-bottom: 4px solid #494848;
+  border-radius: 5px;
+  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.301);
+  cursor: pointer;
+}
+
+.item p.task_name span {
+    color: #888;
+}
+
+.box h2 {
+    padding-top: 10px;
+    font-size: 20px;
+    color: #494848;
+
+}
+
+.history-font {
+  font-size: 17px;
+}
