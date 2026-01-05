@@ -10,7 +10,7 @@
 <body>
     <div class="box" id="heading">
         <h1 style = "color: #ffffff">{{ today }}</h1>
-    </div>
+    </div>   
 
     <div class="box">
 
@@ -42,7 +42,6 @@
             <button type="submit" name="submit">+</button>
         </form>
     </div>
-
-
+<a class="logout" href="{{ url_for('logout') }}">ログアウト</a>
 </body>
 </html>

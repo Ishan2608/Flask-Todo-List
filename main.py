@@ -1,7 +1,13 @@
-from flask import Flask, render_template, redirect, url_for, request
+# from flask import Flask, render_template, redirect, url_for, request
+from flask import Flask, render_template, redirect, url_for, request, session
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
+
 
 app = Flask(__name__)
+app.secret_key = "secretkey" 
+
+users = []
 
 
 items = []
@@ -17,9 +23,47 @@ week_day = week_days[weekday]
 month_name = months[month-1]
 curr_day = f'{day} {month_name} {year}, {week_day}'
 
+@app.route("/signup", methods=["GET", "POST"])
+def signup():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
+        users.append({
+            "username": username,
+            "password": generate_password_hash(password)
+        })
+
+        return redirect("/login")
+
+    return render_template("signup.html")
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
+        for user in users:
+            if user["username"] == username and check_password_hash(user["password"], password):
+                session["user"] = username
+                return redirect("/")
+
+        return "Login failed"
+
+    return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/login")
+
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
+    if "user" not in session:
+        return redirect("/login")
+
     global year, month, day
     if request.method == 'POST':
         form_data = request.form
